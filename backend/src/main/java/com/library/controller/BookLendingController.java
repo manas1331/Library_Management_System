@@ -1,5 +1,6 @@
 package com.library.controller;
 
+import com.library.facade.LibraryFacade;
 import com.library.model.BookLending;
 import com.library.service.BookLendingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,9 @@ import java.util.Optional;
 @CrossOrigin(origins = "*")
 public class BookLendingController {
     
+    @Autowired
+    private LibraryFacade libraryFacade;
+
     @Autowired
     private BookLendingService bookLendingService;
     
@@ -54,12 +58,14 @@ public class BookLendingController {
             return ResponseEntity.badRequest().build();
         }
         
-        BookLending lending = bookLendingService.checkoutBook(bookItemBarcode, memberId);
-        if (lending != null) {
+        boolean success = libraryFacade.checkoutBook(bookItemBarcode, memberId);
+        if (success) {
+            // Optionally, fetch and return the lending record via the service
+            BookLending lending = bookLendingService.getLendingByBarcode(bookItemBarcode);
             return ResponseEntity.status(HttpStatus.CREATED).body(lending);
-        } else {
-            return ResponseEntity.badRequest().build();
         }
+        return ResponseEntity.badRequest().build();
+
     }
     
     @PostMapping("/return")
@@ -70,8 +76,15 @@ public class BookLendingController {
             return ResponseEntity.badRequest().build();
         }
         
-        BookLending lending = bookLendingService.returnBook(bookItemBarcode);
-        if (lending != null) {
+        // BookLending lending = bookLendingService.returnBook(bookItemBarcode);
+        // if (lending != null) {
+        //     return ResponseEntity.ok(lending);
+        // } else {
+        //     return ResponseEntity.badRequest().build();
+        // }
+        boolean success=libraryFacade.returnBook(bookItemBarcode); 
+        if (success) {
+            BookLending lending = bookLendingService.getLendingByBarcode(bookItemBarcode);
             return ResponseEntity.ok(lending);
         } else {
             return ResponseEntity.badRequest().build();

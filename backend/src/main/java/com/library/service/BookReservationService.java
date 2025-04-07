@@ -49,7 +49,7 @@ public class BookReservationService {
             BookReservation reservation = reservationOpt.get();
             reservation.setStatus(ReservationStatus.CANCELED);
             bookReservationRepository.save(reservation);
-            return true;
+            return true; 
         }
         return false;
     }
@@ -58,9 +58,15 @@ public class BookReservationService {
         Optional<BookReservation> reservationOpt = bookReservationRepository.findById(reservationId);
         if (reservationOpt.isPresent()) {
             BookReservation reservation = reservationOpt.get();
-            reservation.setStatus(ReservationStatus.COMPLETED);
-            bookReservationRepository.save(reservation);
-            return true;
+            if (reservation.getStatus() == ReservationStatus.CANCELED) {
+                throw new IllegalStateException("Cannot complete a canceled reservation.");
+            }
+            if (reservation.getStatus() == ReservationStatus.WAITING) {
+                reservation.setStatus(ReservationStatus.COMPLETED);
+                bookReservationRepository.save(reservation);
+                return true;
+            }
+            return false; // If reservation is already COMPLETED, do nothing
         }
         return false;
     }

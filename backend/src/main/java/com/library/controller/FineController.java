@@ -1,5 +1,6 @@
 package com.library.controller;
 
+import com.library.facade.LibraryFacade;
 import com.library.model.Fine;
 import com.library.service.FineService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,8 @@ import java.util.Optional;
 @RequestMapping("/api/fines")
 @CrossOrigin(origins = "*")
 public class FineController {
+    @Autowired
+    private LibraryFacade libraryFacade;
     
     @Autowired
     private FineService fineService;
@@ -40,7 +43,7 @@ public class FineController {
         return ResponseEntity.ok(fineService.getUnpaidFinesByMember(memberId));
     }
     
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<Fine> createFine(@RequestBody Map<String, Object> payload) {
         String bookItemBarcode = (String) payload.get("bookItemBarcode");
         String memberId = (String) payload.get("memberId");
@@ -50,7 +53,8 @@ public class FineController {
             return ResponseEntity.badRequest().build();
         }
         
-        Fine fine = fineService.createFine(bookItemBarcode, memberId, amount);
+        // Delegate fine creation to the facade
+        Fine fine = libraryFacade.createFine(bookItemBarcode, memberId, amount);
         return ResponseEntity.status(HttpStatus.CREATED).body(fine);
     }
     

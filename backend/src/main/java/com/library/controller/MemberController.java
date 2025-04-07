@@ -1,5 +1,6 @@
 package com.library.controller;
 
+import com.library.facade.LibraryFacade;
 import com.library.model.Member;
 import com.library.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,8 @@ import java.util.Optional;
 @RequestMapping("/api/members")
 @CrossOrigin(origins = "*")
 public class MemberController {
-    
+    @Autowired 
+    private LibraryFacade libraryFacade;
     @Autowired
     private MemberService memberService;
     
@@ -47,9 +49,11 @@ public class MemberController {
         }
     }
     
-    @PostMapping
-    public ResponseEntity<Member> addMember(@RequestBody Member member) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(memberService.addMember(member));
+    @PostMapping("/register")
+    public ResponseEntity<Member> registerMember(@RequestBody Member member) {
+        // Delegate member registration to the facade
+        Member registered = libraryFacade.registerMember(member);
+        return ResponseEntity.status(HttpStatus.CREATED).body(registered);
     }
     
     @PutMapping("/{id}")
