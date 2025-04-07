@@ -4,7 +4,7 @@ backend directory
 mvn spring-boot:run
 
 
-frontend directory
+frontend directory 
 
 npm install lucide-react @radix-ui/react-slot class-variance-authority clsx tailwindcss-animate --legacy-peer-deps
 
