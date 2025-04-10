@@ -49,26 +49,39 @@ export default function SignupPage() {
 
   async function onSubmit(data: FormData) {
     setIsLoading(true)
-
+  
     try {
-      // In a real app, we'd make an API call here
-      // Replace with your actual signup API
-      // const response = await fetch("/api/auth/signup", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(data),
-      // })
-      // const result = await response.json()
-
-      // Mock successful signup
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
+      // 1. Fetch existing members to check for duplicates
+      const res = await fetch("http://localhost:8080/api/members")
+      const members = await res.json()
+  
+      const emailExists = members.some((m: any) => m.email === data.email)
+  
+      if (emailExists) {
+        toast({
+          title: "Email already registered",
+          description: "An account with this email already exists. Try logging in instead.",
+          variant: "destructive",
+        })
+        return
+      }
+  
+      // 2. Proceed with registration
+      const registerRes = await fetch("http://localhost:8080/api/members/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+  
+      if (!registerRes.ok) {
+        throw new Error("Failed to register")
+      }
+  
       toast({
         title: "Account created",
         description: "Your account has been successfully created. You can now login.",
       })
-
-      // Redirect to login page
+  
       router.push("/auth/login")
     } catch (error) {
       console.error("Signup error:", error)
@@ -81,6 +94,7 @@ export default function SignupPage() {
       setIsLoading(false)
     }
   }
+  
 
   // Show loading while checking authentication
   if (authLoading) {

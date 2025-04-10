@@ -27,16 +27,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Load user from local storage on initial load
   useEffect(() => {
-    const storedUser = localStorage.getItem("lms_user")
-    if (storedUser) {
+    const loadUser = () => {
       try {
-        setUser(JSON.parse(storedUser))
+        const storedUser = localStorage.getItem("lms_user")
+        if (storedUser) {
+          console.log("Loaded user from localStorage:", storedUser)
+          setUser(JSON.parse(storedUser))
+        } else {
+          console.log("No user found in localStorage")
+        }
       } catch (error) {
         console.error("Failed to parse stored user:", error)
         localStorage.removeItem("lms_user")
+      } finally {
+        setLoading(false)
       }
     }
-    setLoading(false)
+  
+    // Delay just a bit to ensure client hydration
+    setTimeout(loadUser, 0)
   }, [])
 
   const login = useCallback(async (userData: User) => {

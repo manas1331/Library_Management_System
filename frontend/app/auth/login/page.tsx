@@ -45,8 +45,24 @@ export default function LoginPage() {
 
   async function onSubmit(data: FormData) {
     setIsLoading(true)
-
+    
     try {
+      if (data.email === "admin@gmail.com" && data.password === "admin123") {
+        const adminUser = {
+          id: '1',
+          name: "Admin",
+          email: "admin@gmail.com",
+          role: "LIBRARIAN" as const, // Explicitly set the role type
+        }
+  
+        login(adminUser)
+        toast({
+          title: "Welcome Librarian",
+          description: "You are logged in as the administrator.",
+        })
+        router.push("/")
+        return
+      }
       // In a real app, we'd make an API call here
       // Replace with your actual login API
       // const response = await fetch("/api/auth/login", {
@@ -57,28 +73,43 @@ export default function LoginPage() {
       // const result = await response.json()
 
       // Mock successful login - replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Simulate login process with fake data
-      await login({
-        id: "M1001",
-        email: data.email,
-        name: data.email.includes("admin") ? "Admin User" : "Regular User",
-        role: data.email.includes("admin") ? "LIBRARIAN" : "MEMBER"
+      // await new Promise(resolve => setTimeout(resolve, 1000))
+      const response = await fetch("http://localhost:8080/api/members", {
+        method: "GET",
       })
-
+      const members = await response.json()
+      const foundUser = members.find(
+        (m: any) => m.email === data.email && m.password === data.password
+      )
+      if (!foundUser) {
+        toast({
+          title: "Login failed",
+          description: "Invalid email or password. Please try again.",
+          variant: "destructive",
+        })
+        return
+      }
+      const user = {
+        id: foundUser.id,
+        name: foundUser.name,
+        email: foundUser.email,
+        role: foundUser.role === "LIBRARIAN" ? "LIBRARIAN" as const : "MEMBER" as const, // Explicitly cast role type
+      }
+      // Simulate login process with fake data
+      login(user)  // from useAuth()
+    
       toast({
         title: "Login successful",
-        description: "Welcome back to the Library Management System",
+        description: `Welcome back, ${user.name}!`,
       })
 
-      // Redirect to appropriate page based on role
-      router.push("/")
+        // Redirect to home/dashboard
+        router.push("/")
     } catch (error) {
       console.error("Login error:", error)
       toast({
         title: "Login failed",
-        description: "Please check your credentials and try again.",
+        description: "Something went wrong. Please try again later.",
         variant: "destructive",
       })
     } finally {

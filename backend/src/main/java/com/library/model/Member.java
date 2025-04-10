@@ -15,6 +15,7 @@ public class Member {
     private Date dateOfMembership;
     private int totalBooksCheckedout;
     private AccountStatus status;
+    private String password;
 
     public Member() {
         this.dateOfMembership = new Date();
@@ -68,7 +69,12 @@ public class Member {
     public Address getAddress() {
         return address;
     }
-
+    public void getPassword(String password){
+        this.password=password;
+    }
+    public String getPassword(){
+        return password;
+    }
     public void setAddress(Address address) {
         this.address = address;
     }

@@ -92,7 +92,15 @@ public class BookController {
         bookService.deleteBook(id);
         return ResponseEntity.noContent().build();
     }
-    
+    @GetMapping("/{id}/items")
+public ResponseEntity<List<BookItem>> getBookItemsByBookId(@PathVariable String id) {
+    Optional<Book> book = bookService.getBookById(id);
+    if (book.isPresent()) {
+        return ResponseEntity.ok(book.get().getBookItems());
+    } else {
+        return ResponseEntity.notFound().build();
+    }
+}
     @PostMapping("/{id}/items")
     public ResponseEntity<BookItem> addBookItem(@PathVariable String id, 
                                                 @RequestBody Map<String, Object> payload) {

@@ -101,11 +101,11 @@ export default function Home() {
         {isLibrarian ? (
           // Librarian view with all tabs
           <Tabs defaultValue="catalog" className="w-full" onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="catalog">Book Catalog</TabsTrigger>
               <TabsTrigger value="checkout">Checkout</TabsTrigger>
               <TabsTrigger value="return">Return</TabsTrigger>
-              <TabsTrigger value="members">Members</TabsTrigger>
+              {/* <TabsTrigger value="members">Members</TabsTrigger> */}
             </TabsList>
 
             <TabsContent value="catalog" className="mt-6">
@@ -120,9 +120,9 @@ export default function Home() {
               <BookReturn />
             </TabsContent>
 
-            <TabsContent value="members" className="mt-6">
+            {/* <TabsContent value="members" className="mt-6">
               <MemberManagement />
-            </TabsContent>
+            </TabsContent> */}
           </Tabs>
         ) : (
           // Member view with limited tabs
