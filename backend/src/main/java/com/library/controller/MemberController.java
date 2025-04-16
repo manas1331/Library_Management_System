@@ -2,12 +2,14 @@ package com.library.controller;
 
 import com.library.facade.LibraryFacade;
 import com.library.model.Member;
+import com.library.model.AccountStatus;
 import com.library.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -86,6 +88,31 @@ public class MemberController {
     @PutMapping("/{id}/unblock")
     public ResponseEntity<Void> unblockMember(@PathVariable String id) {
         if (memberService.unblockMember(id)) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+    
+    @PutMapping("/{id}/status")
+    public ResponseEntity<Void> updateMemberStatus(
+        @PathVariable String id,
+        @RequestBody Map<String, String> payload) {
+        
+        String status = payload.get("status");
+        if (status == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        AccountStatus accountStatus;
+        try {
+            accountStatus = AccountStatus.valueOf(status);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        boolean updated = memberService.updateMemberStatus(id, accountStatus);
+        if (updated) {
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();

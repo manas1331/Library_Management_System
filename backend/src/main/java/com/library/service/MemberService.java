@@ -87,5 +87,16 @@ public class MemberService {
         }
         return false;
     }
+    
+    public boolean updateMemberStatus(String id, AccountStatus status) {
+        Optional<Member> memberOpt = getMemberById(id);
+        if (memberOpt.isPresent()) {
+            Member member = memberOpt.get();
+            member.setStatus(status);
+            updateMember(member);
+            return true;
+        }
+        return false;
+    }
 }
 

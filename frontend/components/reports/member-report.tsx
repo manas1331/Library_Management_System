@@ -4,8 +4,15 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Download, Loader2, RefreshCw } from "lucide-react"
+import { Download, Loader2, RefreshCw, Edit, Save, X } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select"
 
 export function MemberReport() {
   const [members, setMembers] = useState<any[]>([])
@@ -19,6 +26,9 @@ export function MemberReport() {
     blockedMembers: 0,
     averageCheckouts: 0
   })
+
+  const [editingMemberId, setEditingMemberId] = useState<string | null>(null)
+  const [newStatus, setNewStatus] = useState<string>("ACTIVE")
   
   useEffect(() => {
     fetchMemberData()
@@ -95,6 +105,43 @@ export function MemberReport() {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+  }
+
+  const handleUpdateMemberStatus = async (memberId: string) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/members/${memberId}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          status: newStatus
+        })
+      })
+      
+      if (!response.ok) {
+        throw new Error("Failed to update member status")
+      }
+      
+      // Update the members list with the new status
+      setMembers(members.map(member => 
+        member.id === memberId ? {...member, status: newStatus} : member
+      ))
+      
+      toast({
+        title: "Success",
+        description: "Member status updated successfully",
+      })
+      
+      setEditingMemberId(null)
+    } catch (error) {
+      console.error("Error updating member status:", error)
+      toast({
+        title: "Error",
+        description: "Failed to update member status",
+        variant: "destructive",
+      })
+    }
   }
   
   return (
@@ -193,16 +240,66 @@ export function MemberReport() {
                       <TableCell>{member.name || (member.person ? member.person.name : "Unknown")}</TableCell>
                       <TableCell>{member.email || (member.person ? member.person.email : "Unknown")}</TableCell>
                       <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          member.status === "ACTIVE" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                        }`}>
-                          {member.status}
-                        </span>
+                        {editingMemberId === member.id ? (
+                          <div className="flex items-center space-x-2">
+                            <Select 
+                              value={newStatus} 
+                              onValueChange={setNewStatus}
+                            >
+                              <SelectTrigger className="w-32">
+                                <SelectValue placeholder="Select status" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="ACTIVE">ACTIVE</SelectItem>
+                                <SelectItem value="CLOSED">CLOSED</SelectItem>
+                                <SelectItem value="CANCELED">CANCELED</SelectItem>
+                                <SelectItem value="BLACKLISTED">BLACKLISTED</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              onClick={() => handleUpdateMemberStatus(member.id)}
+                            >
+                              <Save className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              onClick={() => setEditingMemberId(null)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between">
+                            <span className={`px-2 py-1 rounded-full text-xs ${
+                              member.status === "ACTIVE" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                            }`}>
+                              {member.status}
+                            </span>
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              onClick={() => {
+                                setEditingMemberId(member.id)
+                                setNewStatus(member.status)
+                              }}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell>
                         {member.dateOfMembership ? new Date(member.dateOfMembership).toLocaleDateString() : "Unknown"}
                       </TableCell>
                       <TableCell>{member.totalBooksCheckedout || 0}/5</TableCell>
+                      <TableCell>
+                        <Button size="sm" variant="outline" onClick={() => setEditingMemberId(member.id)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

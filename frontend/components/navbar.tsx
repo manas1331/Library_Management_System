@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useAuth } from "@/contexts/auth-context"
 import { Button } from "@/components/ui/button"
-import { BookOpen, LogOut, Menu, User, LogIn, UserPlus, Book, BookCheck, BookX } from "lucide-react"
+import { BookOpen, LogOut, Menu, User, LogIn, UserPlus, Book, BookCheck, BookX, BarChart } from "lucide-react"
 import {
   Sheet,
   SheetContent,

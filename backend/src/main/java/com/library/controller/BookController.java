@@ -4,6 +4,7 @@ import com.library.facade.LibraryFacade;
 import com.library.model.Book;
 import com.library.model.BookItem;
 import com.library.model.BookItemBuilder;
+import com.library.model.BookStatus;
 import com.library.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -130,6 +131,56 @@ public ResponseEntity<List<BookItem>> getBookItemsByBookId(@PathVariable String 
             BookItem added = libraryFacade.addBookItem(id, bookItem);
             if (added != null) {
                 return ResponseEntity.status(HttpStatus.CREATED).body(added);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PutMapping("/items/{barcode}/status")
+    public ResponseEntity<Void> updateBookItemStatus(
+        @PathVariable String barcode,
+        @RequestBody Map<String, String> payload) {
+        
+        String status = payload.get("status");
+        if (status == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        BookStatus bookStatus;
+        try {
+            bookStatus = BookStatus.valueOf(status);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        boolean updated = bookService.updateBookItemStatus(barcode, bookStatus);
+        if (updated) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/{id}/items/quantity")
+    public ResponseEntity<Book> updateBookItemQuantity(
+        @PathVariable String id,
+        @RequestBody Map<String, Object> payload) {
+        
+        try {
+            Integer quantity = Integer.parseInt(payload.get("quantity").toString());
+            String operation = (String) payload.get("operation"); // "increase" or "decrease"
+            
+            if (quantity == null || operation == null || 
+                (!operation.equals("increase") && !operation.equals("decrease"))) {
+                return ResponseEntity.badRequest().build();
+            }
+            
+            Book updatedBook = bookService.updateBookItemQuantity(id, quantity, operation);
+            if (updatedBook != null) {
+                return ResponseEntity.ok(updatedBook);
             } else {
                 return ResponseEntity.notFound().build();
             }
