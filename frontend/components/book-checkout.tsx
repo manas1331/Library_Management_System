@@ -75,6 +75,39 @@ export function BookCheckout() {
         throw new Error("Book item not found")
       }
       
+      // Check if this book is reserved by the current member
+      let isReservedByMember = false;
+      if (bookItem.status === "RESERVED" && memberDetails) {
+        try {
+          // Try to get reservation details for this book
+          const reservationResponse = await fetch(`http://localhost:8080/api/reservations/barcode/${bookBarcode}`)
+          console.log("Reservation Response Status:", reservationResponse.status)
+          
+          if (reservationResponse.ok) {
+            const reservation = await reservationResponse.json()
+            console.log("Reservation data:", reservation)
+            isReservedByMember = reservation.memberId === memberDetails.id
+          } else {
+            // Alternative: Check member's reservations instead
+            const memberReservationsResponse = await fetch(`http://localhost:8080/api/reservations/member/${memberDetails.id}`)
+            
+            if (memberReservationsResponse.ok) {
+              const memberReservations = await memberReservationsResponse.json()
+              console.log("Member reservations:", memberReservations)
+              
+              // Check if any of the member's reservations match this book barcode
+              isReservedByMember = memberReservations.some(
+                (res: any) => res.bookItemBarcode === bookBarcode && 
+                             (res.status === "COMPLETED" || res.status === "PENDING")
+              )
+            }
+          }
+        } catch (error) {
+          console.error("Error checking reservation:", error)
+          // Don't throw error, just log it and continue
+        }
+      }
+      
       setBookDetails({
         barcode: bookItem.barcode,
         title: bookData.title,
@@ -82,6 +115,7 @@ export function BookCheckout() {
         status: bookItem.status,
         isbn: bookData.isbn,
         dueDate: bookItem.dueDate,
+        isReservedByMember: isReservedByMember
       })
     } catch (error) {
       console.error("Error fetching book:", error)
@@ -229,20 +263,36 @@ export function BookCheckout() {
             )}
           </div>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex flex-col gap-2">
           <Button
             className="w-full"
             disabled={
               !memberDetails ||
               !bookDetails ||
               isLoading ||
-              bookDetails?.status !== "AVAILABLE" ||
+              (bookDetails?.status !== "AVAILABLE" && !bookDetails?.isReservedByMember) ||
               memberDetails?.booksCheckedOut >= 5
             }
             onClick={handleCheckout}
           >
-            {isLoading ? "Processing..." : "Checkout Book"}
+            {isLoading ? "Processing..." : (
+              bookDetails?.isReservedByMember ? "Checkout Reserved Book" : "Checkout Book"
+            )}
           </Button>
+          
+          {/* Add helpful user message for reserved books */}
+          {bookDetails?.isReservedByMember && (
+            <p className="text-sm text-amber-600 text-center">
+              This book was reserved by you and is now available for checkout.
+            </p>
+          )}
+          
+          {/* Add error message if book is reserved by someone else */}
+          {bookDetails?.status === "RESERVED" && !bookDetails?.isReservedByMember && (
+            <p className="text-sm text-red-600 text-center">
+              This book is currently reserved by another member.
+            </p>
+          )}
         </CardFooter>
       </Card>
     </div>

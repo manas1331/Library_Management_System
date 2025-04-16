@@ -1,6 +1,7 @@
 package com.library.service;
 
 import com.library.model.BookReservation;
+import com.library.model.BookStatus;
 import com.library.model.ReservationStatus;
 import com.library.repository.BookReservationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,9 @@ public class BookReservationService {
     @Autowired
     private BookReservationRepository bookReservationRepository;
     
+    @Autowired
+    private BookService bookService;
+
     public List<BookReservation> getAllReservations() {
         return bookReservationRepository.findAll();
     }
@@ -38,35 +42,46 @@ public class BookReservationService {
         if (existingReservation != null) {
             return null; // Book already reserved
         }
+        if (!bookService.updateBookItemStatus(bookItemBarcode, BookStatus.RESERVED)) {
+            return null; // Book is not available for reservation
+        }
         
         BookReservation reservation = new BookReservation(bookItemBarcode, memberId);
         return bookReservationRepository.save(reservation);
     }
     
-    public boolean cancelReservation(String reservationId) {
-        Optional<BookReservation> reservationOpt = bookReservationRepository.findById(reservationId);
+    public boolean cancelReservation(String id) {
+        Optional<BookReservation> reservationOpt = bookReservationRepository.findById(id);
         if (reservationOpt.isPresent()) {
             BookReservation reservation = reservationOpt.get();
-            reservation.setStatus(ReservationStatus.CANCELED);
-            bookReservationRepository.save(reservation);
-            return true; 
+            
+            // Only update status if reservation is still waiting
+            if (reservation.getStatus() == ReservationStatus.WAITING) {
+                // Update book status back to AVAILABLE
+                bookService.updateBookItemStatus(reservation.getBookItemBarcode(), BookStatus.AVAILABLE);
+                
+                reservation.setStatus(ReservationStatus.CANCELED);
+                bookReservationRepository.save(reservation);
+                return true;
+            }
         }
         return false;
     }
     
-    public boolean completeReservation(String reservationId) {
-        Optional<BookReservation> reservationOpt = bookReservationRepository.findById(reservationId);
+    public boolean completeReservation(String id) {
+        Optional<BookReservation> reservationOpt = bookReservationRepository.findById(id);
         if (reservationOpt.isPresent()) {
             BookReservation reservation = reservationOpt.get();
-            if (reservation.getStatus() == ReservationStatus.CANCELED) {
-                throw new IllegalStateException("Cannot complete a canceled reservation.");
-            }
+            
+            // Only complete if reservation is still waiting
             if (reservation.getStatus() == ReservationStatus.WAITING) {
+                // No need to update book status here as it will be handled by checkout process
+                // (or you could update to LOANED if this implies checkout)
+                
                 reservation.setStatus(ReservationStatus.COMPLETED);
                 bookReservationRepository.save(reservation);
                 return true;
             }
-            return false; // If reservation is already COMPLETED, do nothing
         }
         return false;
     }

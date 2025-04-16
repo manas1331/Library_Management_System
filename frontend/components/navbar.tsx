@@ -43,14 +43,18 @@ export function Navbar() {
           <Link href="/" className="text-foreground hover:text-foreground/80">
             Home
           </Link>
+          
           <Link href="/books" className="text-foreground hover:text-foreground/80">
             Books
           </Link>
           
-          {isAuthenticated && (user?.role === "LIBRARIAN" || user?.role === "MEMBER") && (
+          {isAuthenticated && (user?.role === "MEMBER") && (
             <>
               <Link href="/checkout" className="text-foreground hover:text-foreground/80">
                 Checkout
+              </Link>
+              <Link href="/reserve" className="text-foreground hover:text-foreground/80">
+                Reserve
               </Link>
               <Link href="/return" className="text-foreground hover:text-foreground/80">
                 Return
@@ -60,6 +64,9 @@ export function Navbar() {
           
           {isAuthenticated && user?.role === "LIBRARIAN" && (
             <>
+              <Link href="/members" className="text-foreground hover:text-foreground/80">
+                Members
+              </Link>
               <Link href="/reports" className="text-foreground hover:text-foreground/80">
                 Reports
               </Link>

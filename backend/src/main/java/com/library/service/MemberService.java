@@ -55,6 +55,9 @@ public class MemberService {
         if (member.getId() == null || member.getId().isEmpty()) {
             member.setId(generateMemberId());
         }
+        if (member.getPassword() == null || member.getPassword().isEmpty()) {
+            member.setPassword("12345678"); // Set a default password
+        }
         return memberRepository.save(member);
     }
     

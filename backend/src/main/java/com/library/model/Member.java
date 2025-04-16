@@ -69,7 +69,7 @@ public class Member {
     public Address getAddress() {
         return address;
     }
-    public void getPassword(String password){
+    public void setPassword(String password){
         this.password=password;
     }
     public String getPassword(){

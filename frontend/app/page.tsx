@@ -55,10 +55,10 @@ export default function Home() {
         {isLibrarian ? (
           // Librarian view with all tabs
           <Tabs defaultValue="catalog" className="w-full" onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-1">
               <TabsTrigger value="catalog">Book Catalog</TabsTrigger>
-              <TabsTrigger value="checkout">Checkout</TabsTrigger>
-              <TabsTrigger value="return">Return</TabsTrigger>
+              {/* <TabsTrigger value="checkout">Checkout</TabsTrigger>
+              <TabsTrigger value="return">Return</TabsTrigger> */}
               {/* <TabsTrigger value="members">Members</TabsTrigger> */}
             </TabsList>
 
@@ -66,17 +66,17 @@ export default function Home() {
               <BookCatalog />
             </TabsContent>
 
-            <TabsContent value="checkout" className="mt-6">
+            {/* <TabsContent value="checkout" className="mt-6">
               <BookCheckout />
             </TabsContent>
 
             <TabsContent value="return" className="mt-6">
               <BookReturn />
-            </TabsContent>
-
-            {/* <TabsContent value="members" className="mt-6">
-              <MemberManagement />
             </TabsContent> */}
+
+            <TabsContent value="members" className="mt-6">
+              <MemberManagement />
+            </TabsContent>
           </Tabs>
         ) : (
           // Member view with limited tabs
@@ -93,15 +93,19 @@ export default function Home() {
             <TabsContent value="myborrowing" className="mt-6">
               {user && user.role === "MEMBER" && (
                 <Tabs defaultValue="borrowing" className="mt-6">
-                  <TabsList className="grid w-full grid-cols-2">
+                  <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="borrowing">My Borrowings</TabsTrigger>
                     <TabsTrigger value="history">Borrowing History</TabsTrigger>
+                    <TabsTrigger value="reservation">Reservation History</TabsTrigger>
                   </TabsList>
                   <TabsContent value="borrowing" className="mt-4">
                     <UserBorrowings />
                   </TabsContent>
                   <TabsContent value="history" className="mt-4">
                     <UserBorrowingHistory />
+                  </TabsContent>
+                  <TabsContent value="reservation" className="mt-4">
+                    Hello world
                   </TabsContent>
                 </Tabs>
               )}

@@ -36,11 +36,6 @@ export function BookCatalogWithAdd() {
   const [loading, setLoading] = useState(true)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [selectedBook, setSelectedBook] = useState<Book | null>(null) // For the book being updated
-  // const [newBookItem, setNewBookItem] = useState({
-  //   barcode: "",
-  //   status: "AVAILABLE",
-  //   rack: ""
-  // })
   const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false)
   const [form, setForm] = useState({
     title: "",
@@ -62,38 +57,12 @@ export function BookCatalogWithAdd() {
   const [isViewItemsModalOpen, setIsViewItemsModalOpen] = useState(false)
   const [loadingItems, setLoadingItems] = useState(false)
   const { toast } = useToast()
+  
   useEffect(() => {
     console.log("User:", user)
     console.log("User Role:", user?.role)
   }, [user])
-  const handleReserveBook = async (bookItemBarcode: string) => {
-    try {
-      const response = await fetch(`http://localhost:8080/api/reservations/reserve`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ bookItemBarcode,memberId: user?.id }), // Pass the user ID for reservation
-      })
   
-      if (!response.ok) {
-        throw new Error("Failed to reserve book")
-      }
-  
-      toast({
-        title: "Success",
-        description: "Book reserved successfully!",
-      })
-    } catch (error) {
-      console.error("Error reserving book:", error)
-      toast({
-        title: "Error",
-        description: "Failed to reserve book. Please try again.",
-        variant: "destructive",
-      })
-    }
-  }
-
   const handleAddBookItem = async () => {
     if (!selectedBook) return
   
@@ -163,6 +132,7 @@ export function BookCatalogWithAdd() {
       })
     }
   }
+  
   const fetchBooks = async () => {
     try {
       const response = await fetch("http://localhost:8080/api/books")
@@ -179,6 +149,7 @@ export function BookCatalogWithAdd() {
       setLoading(false)
     }
   }
+  
   const fetchBookItems = async (bookId: string) => {
     setLoadingItems(true)
     try {
@@ -197,6 +168,7 @@ export function BookCatalogWithAdd() {
       setLoadingItems(false)
     }
   }
+  
   useEffect(() => {
     fetchBooks()
   }, [])
@@ -206,50 +178,50 @@ export function BookCatalogWithAdd() {
   }
 
 
-const handleAddBook = async () => {
-  try {
-    const newBook = {
-      title: form.title,
-      authors: form.authors.split(",").map((a) => a.trim()),
-      subject: form.subject,
-      isbn: form.isbn,
-      publisher: form.publisher,
-      language: "English", // Default language
-      numberOfPages: 0, // Default value that can be updated later
-      publicationDate: new Date().toISOString().split('T')[0], // Current date as default
-      bookItems: [] // Initialize with empty array
+  const handleAddBook = async () => {
+    try {
+      const newBook = {
+        title: form.title,
+        authors: form.authors.split(",").map((a) => a.trim()),
+        subject: form.subject,
+        isbn: form.isbn,
+        publisher: form.publisher,
+        language: "English", // Default language
+        numberOfPages: 0, // Default value that can be updated later
+        publicationDate: new Date().toISOString().split('T')[0], // Current date as default
+        bookItems: [] // Initialize with empty array
+      }
+
+      const response = await fetch("http://localhost:8080/api/books", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(newBook)
+      })
+
+      if (!response.ok) throw new Error("Failed to add book")
+      
+      const addedBook = await response.json();
+      
+      // Update the books state with the new book
+      setBooks(prevBooks => [...prevBooks, addedBook]);
+
+      toast({
+        title: "Success",
+        description: "Book added successfully!"
+      })
+
+      setIsAddModalOpen(false)
+      setForm({ title: "", authors: "", subject: "", isbn: "", publisher: "" })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Could not add book.",
+        variant: "destructive"
+      })
     }
-
-    const response = await fetch("http://localhost:8080/api/books", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(newBook)
-    })
-
-    if (!response.ok) throw new Error("Failed to add book")
-    
-    const addedBook = await response.json();
-    
-    // Update the books state with the new book
-    setBooks(prevBooks => [...prevBooks, addedBook]);
-
-    toast({
-      title: "Success",
-      description: "Book added successfully!"
-    })
-
-    setIsAddModalOpen(false)
-    setForm({ title: "", authors: "", subject: "", isbn: "", publisher: "" })
-  } catch (error) {
-    toast({
-      title: "Error",
-      description: "Could not add book.",
-      variant: "destructive"
-    })
   }
-}
 
   const filteredBooks = books.filter((book) => {
     if (!searchQuery) return true
@@ -294,10 +266,10 @@ const handleAddBook = async () => {
           </Select>
         </div>
         {user?.role === "LIBRARIAN" && (
-  <Button onClick={() => setIsAddModalOpen(true)}>
-    <Plus className="mr-2 h-4 w-4" /> Add Book
-  </Button>
-)}
+          <Button onClick={() => setIsAddModalOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> Add Book
+          </Button>
+        )}
       </div>
 
       {loading ? (
@@ -328,42 +300,41 @@ const handleAddBook = async () => {
                     <span>{book.publisher}</span>
                   </div>
                   <div className="flex justify-between">
-      <span className="text-muted-foreground">Book Items:</span>
-      <span>{book.bookItems?.length || 0}</span> {/* Display the number of book items */}
-    </div>
+                    <span className="text-muted-foreground">Total Book Items:</span>
+                    <span>{book.bookItems?.length || 0}</span> {/* Display the number of book items */}
+                  </div>
                 </div>
               </CardContent>
               <CardFooter>
-              
-              {user?.role === "LIBRARIAN" && (
-                <div className="flex space-x-2">
-  <Button
-    variant="outline"
-    onClick={() => {
-      setSelectedBook(book)
-      setIsAddItemModalOpen(true)
-    }}
-  >
-    Add Book Item
-  </Button>
-  <Button
-  variant="default"
-  onClick={() => fetchBookItems(book.id)}
->
-  View Book Items
-</Button>
-</div>
-)}
-            {user?.role === "MEMBER" && (
-  <div className="flex space-x-2">
-    <Button
-  variant="default"
-  onClick={() => fetchBookItems(book.id)}
->
-  View Book Items
-</Button>
-  </div>
-)}
+                {user?.role === "LIBRARIAN" && (
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedBook(book)
+                        setIsAddItemModalOpen(true)
+                      }}
+                    >
+                      Add Book Item
+                    </Button>
+                    <Button
+                      variant="default"
+                      onClick={() => fetchBookItems(book.id)}
+                    >
+                      View Book Items
+                    </Button>
+                  </div>
+                )}
+                {user?.role === "MEMBER" && (
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="default"
+                      onClick={() => fetchBookItems(book.id)}
+                    >
+                      View Book Items
+                    </Button>
+                  </div>
+                )}
               </CardFooter>
             </Card>
           ))}
@@ -375,53 +346,53 @@ const handleAddBook = async () => {
         </div>
       )}
       <Dialog open={isAddItemModalOpen} onOpenChange={setIsAddItemModalOpen}>
-    <DialogContent>
-    <DialogHeader>
-      <DialogTitle>Add Book Item</DialogTitle>
-    </DialogHeader>
-    <div className="space-y-3">
-      <Input
-        placeholder="Barcode"
-        value={newBookItem.barcode}
-        onChange={(e) => setNewBookItem({ ...newBookItem, barcode: e.target.value })}
-      />
-      <Input
-        placeholder="Rack"
-        value={newBookItem.rack}
-        onChange={(e) => setNewBookItem({ ...newBookItem, rack: e.target.value })}
-      />
-      <Input
-        placeholder="Price"
-        type="number"
-        onChange={(e) => setNewBookItem({ ...newBookItem, price: parseFloat(e.target.value) })}
-      />
-      <Input
-        placeholder="Format"
-        onChange={(e) => setNewBookItem({ ...newBookItem, format: e.target.value })}
-      />
-      <Input
-        placeholder="Date of Purchase (yyyy-MM-dd)"
-        onChange={(e) => setNewBookItem({ ...newBookItem, dateOfPurchase: e.target.value })}
-      />
-      <div className="flex items-center space-x-2">
-        <input
-          type="checkbox"
-          id="isReferenceOnly"
-          checked={newBookItem.isReferenceOnly}
-          onChange={(e) => setNewBookItem({ ...newBookItem, isReferenceOnly: e.target.checked })}
-        />
-        <label htmlFor="isReferenceOnly">Reference Only</label>
-      </div>
-    </div>
-    
-    <DialogFooter>
-      <Button variant="outline" onClick={() => setIsAddItemModalOpen(false)}>
-        Cancel
-      </Button>
-      <Button onClick={handleAddBookItem}>Add Book Item</Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Book Item</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Input
+              placeholder="Barcode"
+              value={newBookItem.barcode}
+              onChange={(e) => setNewBookItem({ ...newBookItem, barcode: e.target.value })}
+            />
+            <Input
+              placeholder="Rack"
+              value={newBookItem.rack}
+              onChange={(e) => setNewBookItem({ ...newBookItem, rack: e.target.value })}
+            />
+            <Input
+              placeholder="Price"
+              type="number"
+              onChange={(e) => setNewBookItem({ ...newBookItem, price: parseFloat(e.target.value) })}
+            />
+            <Input
+              placeholder="Format"
+              onChange={(e) => setNewBookItem({ ...newBookItem, format: e.target.value })}
+            />
+            <Input
+              placeholder="Date of Purchase (yyyy-MM-dd)"
+              onChange={(e) => setNewBookItem({ ...newBookItem, dateOfPurchase: e.target.value })}
+            />
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="isReferenceOnly"
+                checked={newBookItem.isReferenceOnly}
+                onChange={(e) => setNewBookItem({ ...newBookItem, isReferenceOnly: e.target.checked })}
+              />
+              <label htmlFor="isReferenceOnly">Reference Only</label>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddItemModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddBookItem}>Add Book Item</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
         <DialogContent>
           <DialogHeader>
@@ -471,14 +442,6 @@ const handleAddBook = async () => {
                       <TableCell className="px-4 py-2">${item.price.toFixed(2)}</TableCell>
                       <TableCell className="px-4 py-2">{item.format}</TableCell>
                       <TableCell className="px-4 py-2">{item.isReferenceOnly ? "Yes" : "No"}</TableCell>
-                      <TableCell className="px-4 py-2"><Button
-      size="sm"
-      onClick={() => handleReserveBook(item.barcode)}
-      disabled={item.isReferenceOnly || item.status !== "AVAILABLE"} // Optional
-    >
-      Reserve
-    </Button>
-    </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -494,7 +457,6 @@ const handleAddBook = async () => {
             <Button variant="outline" onClick={() => setIsViewItemsModalOpen(false)}>
               Close
             </Button>
-            
           </DialogFooter>
         </DialogContent>
       </Dialog>
