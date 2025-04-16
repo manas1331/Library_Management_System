@@ -8,29 +8,39 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/contexts/auth-context"
+import { useRouter } from "next/navigation"
 
 export function BookCheckout() {
-  const [memberBarcode, setMemberBarcode] = useState("")
+  const [memberId, setMemberId] = useState("") // Renamed from memberBarcode
   const [bookBarcode, setBookBarcode] = useState("")
   const [memberDetails, setMemberDetails] = useState<any>(null)
   const [bookDetails, setBookDetails] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
+  const { user } = useAuth()
+  const router = useRouter()
 
   const handleMemberSearch = async () => {
-    if (!memberBarcode) return
+    if (!memberId) return
 
     setIsLoading(true)
-    // In a real app, this would be an API call
     try {
-      // Mock data for demo
+      // Call the API using member ID instead of barcode
+      const response = await fetch(`http://localhost:8080/api/members/${memberId}`)
+      
+      if (!response.ok) {
+        throw new Error("Member not found")
+      }
+      
+      const data = await response.json()
       setMemberDetails({
-        id: "M1001",
-        name: "John Doe",
-        email: "john.doe@example.com",
-        booksCheckedOut: 2,
-        status: "ACTIVE",
-        memberSince: "2022-01-15",
+        id: data.id,
+        name: data.name || (data.person ? data.person.name : 'Unknown'),
+        email: data.email || (data.person ? data.person.email : 'Unknown'),
+        booksCheckedOut: data.totalBooksCheckedout,
+        status: data.status,
+        memberSince: data.dateOfMembership,
       })
     } catch (error) {
       console.error("Error fetching member:", error)
@@ -48,16 +58,30 @@ export function BookCheckout() {
     if (!bookBarcode) return
 
     setIsLoading(true)
-    // In a real app, this would be an API call
     try {
-      // Mock data for demo
+      // Call the actual API to get book details by barcode
+      const response = await fetch(`http://localhost:8080/api/books/barcode/${bookBarcode}`)
+      
+      if (!response.ok) {
+        throw new Error("Book not found")
+      }
+      
+      const bookData = await response.json()
+      
+      // Find the specific book item with the matching barcode
+      const bookItem = bookData.bookItems.find((item: any) => item.barcode === bookBarcode)
+      
+      if (!bookItem) {
+        throw new Error("Book item not found")
+      }
+      
       setBookDetails({
-        barcode: bookBarcode,
-        title: "The Great Gatsby",
-        author: "F. Scott Fitzgerald",
-        status: "AVAILABLE",
-        isbn: "978-0-7432-7356-5",
-        dueDate: null,
+        barcode: bookItem.barcode,
+        title: bookData.title,
+        author: bookData.authors.join(", "),
+        status: bookItem.status,
+        isbn: bookData.isbn,
+        dueDate: bookItem.dueDate,
       })
     } catch (error) {
       console.error("Error fetching book:", error)
@@ -75,22 +99,39 @@ export function BookCheckout() {
     if (!memberDetails || !bookDetails) return
 
     setIsLoading(true)
-    // In a real app, this would be an API call
     try {
-      // Mock checkout process
-      setTimeout(() => {
-        toast({
-          title: "Success",
-          description: "Book has been checked out successfully.",
+      const response = await fetch("http://localhost:8080/api/lendings/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          bookItemBarcode: bookDetails.barcode,
+          memberId: memberDetails.id
         })
+      })
+      
+      if (!response.ok) {
+        throw new Error("Failed to checkout book")
+      }
+      
+      const result = await response.json()
+      
+      toast({
+        title: "Success",
+        description: "Book has been checked out successfully.",
+      })
 
-        // Reset form
-        setMemberBarcode("")
-        setBookBarcode("")
-        setMemberDetails(null)
-        setBookDetails(null)
-        setIsLoading(false)
-      }, 1000)
+      // Reset form
+      setMemberId("")
+      setBookBarcode("")
+      setMemberDetails(null)
+      setBookDetails(null)
+      
+      // Redirect to the profile page to see borrowings
+      if (user && user.role === "MEMBER") {
+        router.push('/profile')
+      }
     } catch (error) {
       console.error("Error checking out book:", error)
       toast({
@@ -98,6 +139,7 @@ export function BookCheckout() {
         description: "Failed to checkout book. Please try again.",
         variant: "destructive",
       })
+    } finally {
       setIsLoading(false)
     }
   }
@@ -112,15 +154,15 @@ export function BookCheckout() {
         <CardContent className="space-y-6">
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="memberBarcode">Member Barcode</Label>
+              <Label htmlFor="memberId">Member ID</Label>
               <div className="flex space-x-2">
                 <Input
-                  id="memberBarcode"
-                  placeholder="Scan or enter member barcode"
-                  value={memberBarcode}
-                  onChange={(e) => setMemberBarcode(e.target.value)}
+                  id="memberId"
+                  placeholder="Enter member ID"
+                  value={memberId}
+                  onChange={(e) => setMemberId(e.target.value)}
                 />
-                <Button onClick={handleMemberSearch} disabled={!memberBarcode || isLoading}>
+                <Button onClick={handleMemberSearch} disabled={!memberId || isLoading}>
                   <User className="mr-2 h-4 w-4" />
                   Find
                 </Button>
@@ -133,6 +175,8 @@ export function BookCheckout() {
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <span className="text-muted-foreground">Name:</span>
                   <span>{memberDetails.name}</span>
+                  <span className="text-muted-foreground">Email:</span>
+                  <span>{memberDetails.email}</span>
                   <span className="text-muted-foreground">ID:</span>
                   <span>{memberDetails.id}</span>
                   <span className="text-muted-foreground">Books Checked Out:</span>
@@ -204,4 +248,3 @@ export function BookCheckout() {
     </div>
   )
 }
-

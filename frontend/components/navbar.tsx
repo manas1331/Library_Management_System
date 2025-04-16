@@ -1,297 +1,189 @@
-// "use client"
-
-// import { useState } from "react"
-// import Link from "next/link"
-// import { Book, LogOut, Menu, User } from "lucide-react"
-// import { Button } from "@/components/ui/button"
-// import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-
-// export function Navbar() {
-//   const [isLibrarian, setIsLibrarian] = useState(true)
-
-//   return (
-//     <nav className="bg-white border-b">
-//       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-//         <div className="flex items-center space-x-2">
-//           <Book className="h-6 w-6 text-primary" />
-//           <span className="text-xl font-semibold">LibraryMS</span>
-//         </div>
-
-//         <div className="hidden md:flex items-center space-x-6">
-//           <Link href="/" className="text-gray-700 hover:text-primary">
-//             Home
-//           </Link>
-//           <Link href="/books" className="text-gray-700 hover:text-primary">
-//             Books
-//           </Link>
-//           {isLibrarian && (
-//             <>
-//               <Link href="/members" className="text-gray-700 hover:text-primary">
-//                 Members
-//               </Link>
-//               <Link href="/reports" className="text-gray-700 hover:text-primary">
-//                 Reports
-//               </Link>
-//             </>
-//           )}
-//         </div>
-
-//         <div className="flex items-center space-x-4">
-//           <Button variant="ghost" size="icon" className="rounded-full">
-//             <User className="h-5 w-5" />
-//           </Button>
-//           <Button variant="ghost" size="icon">
-//             <LogOut className="h-5 w-5" />
-//           </Button>
-
-//           <Sheet>
-//             <SheetTrigger asChild>
-//               <Button variant="ghost" size="icon" className="md:hidden">
-//                 <Menu className="h-5 w-5" />
-//               </Button>
-//             </SheetTrigger>
-//             <SheetContent>
-//               <div className="flex flex-col space-y-4 mt-8">
-//                 <Link href="/" className="text-gray-700 hover:text-primary">
-//                   Home
-//                 </Link>
-//                 <Link href="/books" className="text-gray-700 hover:text-primary">
-//                   Books
-//                 </Link>
-//                 {isLibrarian && (
-//                   <>
-//                     <Link href="/members" className="text-gray-700 hover:text-primary">
-//                       Members
-//                     </Link>
-//                     <Link href="/reports" className="text-gray-700 hover:text-primary">
-//                       Reports
-//                     </Link>
-//                   </>
-//                 )}
-//               </div>
-//             </SheetContent>
-//           </Sheet>
-//         </div>
-//       </div>
-//     </nav>
-//   )
-// }
-
-// "use client"
-
-// import { useState } from "react"
-// import Link from "next/link"
-// import { Book, LogOut, Menu, User } from "lucide-react"
-// import { Button } from "@/components/ui/button"
-// import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-// import {
-//   DropdownMenu,
-//   DropdownMenuContent,
-//   DropdownMenuItem,
-//   DropdownMenuTrigger
-// } from "@/components/ui/dropdown-menu"
-// import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-
-// export function Navbar() {
-//   const [isLibrarian, setIsLibrarian] = useState(true)
-
-//   return (
-//     <nav className="bg-white border-b">
-//       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-//         <div className="flex items-center space-x-2">
-//           <Book className="h-6 w-6 text-primary" />
-//           <span className="text-xl font-semibold">LibraryMS</span>
-//         </div>
-
-//         <div className="hidden md:flex items-center space-x-6">
-//           <Link href="/" className="text-gray-700 hover:text-primary">
-//             Home
-//           </Link>
-//           <Link href="/books" className="text-gray-700 hover:text-primary">
-//             Books
-//           </Link>
-//           {isLibrarian && (
-//             <>
-//               <Link href="/members" className="text-gray-700 hover:text-primary">
-//                 Members
-//               </Link>
-//               <Link href="/reports" className="text-gray-700 hover:text-primary">
-//                 Reports
-//               </Link>
-//             </>
-//           )}
-//         </div>
-
-//         <div className="flex items-center space-x-4">
-//           <DropdownMenu>
-//             <DropdownMenuTrigger asChild>
-//               <Button variant="ghost" size="icon" className="rounded-full">
-//                 <Avatar className="h-8 w-8">
-//                   <AvatarFallback>
-//                     <User className="h-5 w-5" />
-//                   </AvatarFallback>
-//                 </Avatar>
-//               </Button>
-//             </DropdownMenuTrigger>
-//             <DropdownMenuContent align="end">
-//               <DropdownMenuItem asChild>
-//                 <Link href="/profile" className="cursor-pointer w-full">Profile</Link>
-//               </DropdownMenuItem>
-//               <DropdownMenuItem>Settings</DropdownMenuItem>
-//             </DropdownMenuContent>
-//           </DropdownMenu>
-          
-//           <Button variant="ghost" size="icon">
-//             <LogOut className="h-5 w-5" />
-//           </Button>
-
-//           <Sheet>
-//             <SheetTrigger asChild>
-//               <Button variant="ghost" size="icon" className="md:hidden">
-//                 <Menu className="h-5 w-5" />
-//               </Button>
-//             </SheetTrigger>
-//             <SheetContent>
-//               <div className="flex flex-col space-y-4 mt-8">
-//                 <Link href="/" className="text-gray-700 hover:text-primary">
-//                   Home
-//                 </Link>
-//                 <Link href="/books" className="text-gray-700 hover:text-primary">
-//                   Books
-//                 </Link>
-//                 {isLibrarian && (
-//                   <>
-//                     <Link href="/members" className="text-gray-700 hover:text-primary">
-//                       Members
-//                     </Link>
-//                     <Link href="/reports" className="text-gray-700 hover:text-primary">
-//                       Reports
-//                     </Link>
-//                   </>
-//                 )}
-//                 <Link href="/profile" className="text-gray-700 hover:text-primary">
-//                   Profile
-//                 </Link>
-//               </div>
-//             </SheetContent>
-//           </Sheet>
-//         </div>
-//       </div>
-//     </nav>
-//   )
-// }
-
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
-import { Book, LogOut, Menu, User } from "lucide-react"
+import { useAuth } from "@/contexts/auth-context"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { BookOpen, LogOut, Menu, User, LogIn, UserPlus, Book, BookCheck, BookX } from "lucide-react"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { useAuth } from "@/hooks/use-auth"
 
 export function Navbar() {
   const { user, logout, isAuthenticated } = useAuth()
-  const isLibrarian = user?.role === "LIBRARIAN"
-
-  if (!isAuthenticated) {
-    return null; // Don't show navbar if not authenticated
-  }
 
   return (
-    <nav className="bg-white border-b">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <Book className="h-6 w-6 text-primary" />
-          <span className="text-xl font-semibold">LibraryMS</span>
+    <header className="bg-white border-b sticky top-0 z-50">
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="flex items-center">
+          <Link href="/" className="flex items-center space-x-2">
+            <BookOpen className="h-6 w-6" />
+            <span className="font-bold text-xl">Library System</span>
+          </Link>
         </div>
-
-        <div className="hidden md:flex items-center space-x-6">
-          <Link href="/" className="text-gray-700 hover:text-primary">
+        
+        <div className="hidden md:flex space-x-6">
+          <Link href="/" className="text-gray-700 hover:text-gray-900">
             Home
           </Link>
-          <Link href="/books" className="text-gray-700 hover:text-primary">
+          <Link href="/books" className="text-gray-700 hover:text-gray-900">
             Books
           </Link>
-          {isLibrarian && (
+          
+          {isAuthenticated && (user?.role === "LIBRARIAN" || user?.role === "MEMBER") && (
             <>
-              <Link href="/members" className="text-gray-700 hover:text-primary">
-                Members
+              <Link href="/checkout" className="text-gray-700 hover:text-gray-900">
+                Checkout
               </Link>
-              <Link href="/reports" className="text-gray-700 hover:text-primary">
+              <Link href="/return" className="text-gray-700 hover:text-gray-900">
+                Return
+              </Link>
+            </>
+          )}
+          
+          {isAuthenticated && user?.role === "LIBRARIAN" && (
+            <>
+              
+              <Link href="/reports" className="text-gray-700 hover:text-gray-900">
                 Reports
               </Link>
             </>
           )}
         </div>
-
+        
         <div className="flex items-center space-x-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback>
-                    {user?.name.split(' ').map(n => n[0]).join('') || <User className="h-5 w-5" />}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <Link href="/profile" className="cursor-pointer w-full">Profile</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => logout()}>Logout</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          
-          <Button variant="ghost" size="icon" onClick={() => logout()}>
-            <LogOut className="h-5 w-5" />
-          </Button>
+          {isAuthenticated ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <User className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>{user?.name}</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-xs text-gray-500">{user?.email}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link href="/profile">My Profile</Link>
+                </DropdownMenuItem>
 
+                {user?.role === "MEMBER" && (
+                  <DropdownMenuItem asChild className="cursor-pointer">
+                    <Link href="/membership/manage">Manage Membership</Link>
+                  </DropdownMenuItem>
+                )}
+                
+                <DropdownMenuItem onClick={logout} className="justify-start px-2 cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <Button variant="ghost" asChild>
+                <Link href="/auth/login">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Login
+                </Link>
+              </Button>
+              <Button asChild>
+                <Link href="/membership">
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Register
+                </Link>
+              </Button>
+            </div>
+          )}
+          
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="h-5 w-5" />
+                <Menu className="h-6 w-6" />
+                <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent>
-              <div className="flex flex-col space-y-4 mt-8">
-                <Link href="/" className="text-gray-700 hover:text-primary">
+            <SheetContent side="right">
+              <SheetHeader>
+                <SheetTitle>Library System</SheetTitle>
+              </SheetHeader>
+              <nav className="flex flex-col gap-4 mt-6">
+                <Link href="/" className="flex items-center gap-2 text-lg">
+                  <BookOpen className="h-5 w-5" />
                   Home
                 </Link>
-                <Link href="/books" className="text-gray-700 hover:text-primary">
+                <Link href="/books" className="flex items-center gap-2 text-lg">
+                  <Book className="h-5 w-5" />
                   Books
                 </Link>
-                {isLibrarian && (
+                
+                {isAuthenticated && (user?.role === "LIBRARIAN" || user?.role === "MEMBER") && (
                   <>
-                    <Link href="/members" className="text-gray-700 hover:text-primary">
-                      Members
+                    <Link href="/checkout" className="flex items-center gap-2 text-lg">
+                      <BookCheck className="h-5 w-5" />
+                      Checkout
                     </Link>
-                    <Link href="/reports" className="text-gray-700 hover:text-primary">
+                    <Link href="/return" className="flex items-center gap-2 text-lg">
+                      <BookX className="h-5 w-5" />
+                      Return
+                    </Link>
+                  </>
+                )}
+                
+                {isAuthenticated && user?.role === "LIBRARIAN" && (
+                  <>
+                    <Link href="/admin" className="flex items-center gap-2 text-lg">
+                      <User className="h-5 w-5" />
+                      Admin
+                    </Link>
+                    <Link href="/reports" className="flex items-center gap-2 text-lg">
+                      <Book className="h-5 w-5" />
                       Reports
                     </Link>
                   </>
                 )}
-                <Link href="/profile" className="text-gray-700 hover:text-primary">
-                  Profile
-                </Link>
-                <Button variant="outline" onClick={() => logout()} className="flex items-center gap-2">
-                  <LogOut className="h-4 w-4" />
-                  Logout
-                </Button>
-              </div>
+                
+                {user?.role === "MEMBER" && (
+                  <Link href="/membership/manage" className="flex items-center gap-2 text-lg">
+                    <UserPlus className="h-5 w-5" />
+                    Manage Membership
+                  </Link>
+                )}
+                
+                {isAuthenticated ? (
+                  <Button variant="ghost" onClick={logout} className="justify-start px-2 cursor-pointer">
+                    <LogOut className="mr-2 h-5 w-5" />
+                    Log out
+                  </Button>
+                ) : (
+                  <>
+                    <Link href="/auth/login" className="flex items-center gap-2 text-lg">
+                      <LogIn className="h-5 w-5" />
+                      Login
+                    </Link>
+                    <Link href="/membership" className="flex items-center gap-2 text-lg">
+                      <UserPlus className="h-5 w-5" />
+                      Register
+                    </Link>
+                  </>
+                )}
+              </nav>
             </SheetContent>
           </Sheet>
         </div>
       </div>
-    </nav>
+    </header>
   )
 }

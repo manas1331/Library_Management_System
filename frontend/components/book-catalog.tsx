@@ -28,6 +28,7 @@ export function BookCatalog() {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
+        setLoading(true);
         const response = await fetch("http://localhost:8080/api/books")
         if (!response.ok) {
           throw new Error("Failed to fetch books")

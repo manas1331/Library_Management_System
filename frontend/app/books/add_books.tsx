@@ -205,43 +205,51 @@ export function BookCatalogWithAdd() {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  const handleAddBook = async () => {
-    try {
-      const newBook = {
-        title: form.title,
-        authors: form.authors.split(",").map((a) => a.trim()),
-        subject: form.subject,
-        isbn: form.isbn,
-        publisher: form.publisher,
-        bookItems: []
-      }
 
-      const response = await fetch("http://localhost:8080/api/books", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(newBook)
-      })
-
-      if (!response.ok) throw new Error("Failed to add book")
-
-      toast({
-        title: "Success",
-        description: "Book added successfully!"
-      })
-
-      setIsAddModalOpen(false)
-      setForm({ title: "", authors: "", subject: "", isbn: "", publisher: "" })
-      fetchBooks()
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Could not add book.",
-        variant: "destructive"
-      })
+const handleAddBook = async () => {
+  try {
+    const newBook = {
+      title: form.title,
+      authors: form.authors.split(",").map((a) => a.trim()),
+      subject: form.subject,
+      isbn: form.isbn,
+      publisher: form.publisher,
+      language: "English", // Default language
+      numberOfPages: 0, // Default value that can be updated later
+      publicationDate: new Date().toISOString().split('T')[0], // Current date as default
+      bookItems: [] // Initialize with empty array
     }
+
+    const response = await fetch("http://localhost:8080/api/books", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(newBook)
+    })
+
+    if (!response.ok) throw new Error("Failed to add book")
+    
+    const addedBook = await response.json();
+    
+    // Update the books state with the new book
+    setBooks(prevBooks => [...prevBooks, addedBook]);
+
+    toast({
+      title: "Success",
+      description: "Book added successfully!"
+    })
+
+    setIsAddModalOpen(false)
+    setForm({ title: "", authors: "", subject: "", isbn: "", publisher: "" })
+  } catch (error) {
+    toast({
+      title: "Error",
+      description: "Could not add book.",
+      variant: "destructive"
+    })
   }
+}
 
   const filteredBooks = books.filter((book) => {
     if (!searchQuery) return true

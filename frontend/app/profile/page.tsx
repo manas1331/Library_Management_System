@@ -12,6 +12,8 @@ import { Separator } from "@/components/ui/separator"
 import { useAuth } from "@/hooks/use-auth"
 import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/navbar"
+import { UserBorrowings } from "@/components/user-borrowings"
+import { UserBorrowingHistory } from "@/components/user-borrowing-history"
 
 export default function ProfilePage() {
   const { user: authUser, isAuthenticated, loading: authLoading } = useAuth()
@@ -243,41 +245,46 @@ export default function ProfilePage() {
                 <CardDescription>Books you have previously borrowed</CardDescription>
               </CardHeader>
               <CardContent>
-                {member.borrowingHistory && member.borrowingHistory.length > 0 ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Title</TableHead>
-                        <TableHead>Author(s)</TableHead>
-                        <TableHead>Borrowed Date</TableHead>
-                        <TableHead>Returned Date</TableHead>
-                        <TableHead>Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {member.borrowingHistory.map((book: any) => (
-                        <TableRow key={book.barcode}>
-                          <TableCell className="font-medium">{book.title}</TableCell>
-                          <TableCell>{book.authors.join(", ")}</TableCell>
-                          <TableCell>{new Date(book.borrowDate).toLocaleDateString()}</TableCell>
-                          <TableCell>{book.returnDate ? new Date(book.returnDate).toLocaleDateString() : "N/A"}</TableCell>
-                          <TableCell>
-                            <Badge variant="secondary">{book.status}</Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                ) : (
-                  <div className="text-center py-8">
-                    <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-50" />
-                    <p className="text-muted-foreground">You have no borrowing history yet.</p>
-                  </div>
-                )}
+                <UserBorrowingHistory />
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
+
+        {authUser?.role === "MEMBER" && (
+          <div className="mt-8">
+            <Tabs defaultValue="borrowing" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="borrowing">Current Borrowings</TabsTrigger>
+                <TabsTrigger value="history">Borrowing History</TabsTrigger>
+              </TabsList>
+              <TabsContent value="borrowing">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Books You Have Borrowed</CardTitle>
+                    <CardDescription>Books currently checked out</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <UserBorrowings />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="history">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Borrowing History</CardTitle>
+                    <CardDescription>Books you have previously borrowed</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground text-center py-10">
+                      Your borrowing history will be displayed here.
+                    </p>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
+        )}
       </div>
     </>
   )
