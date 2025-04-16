@@ -305,7 +305,7 @@ const handleAddBook = async () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredBooks.map((book) => (
-            <Card key={book.id} className="overflow-hidden">
+            <Card key={book.id} className="overflow-hidden bg-card text-card-foreground">
               <CardHeader className="pb-3">
                 <CardTitle className="line-clamp-2">{book.title}</CardTitle>
               </CardHeader>
@@ -453,7 +453,7 @@ const handleAddBook = async () => {
             <div className="rounded-md border">
               <Table className="min-w-full">
                 <TableHeader>
-                  <TableRow className="bg-gray-100">
+                  <TableRow className="bg-muted">
                     <TableHead className="px-4 py-2 text-left">Barcode</TableHead>
                     <TableHead className="px-4 py-2 text-left">Status</TableHead>
                     <TableHead className="px-4 py-2 text-left">Rack</TableHead>
@@ -464,7 +464,7 @@ const handleAddBook = async () => {
                 </TableHeader>
                 <TableBody>
                   {selectedBookItems.map((item) => (
-                    <TableRow key={item.barcode} className="hover:bg-gray-50">
+                    <TableRow key={item.barcode} className="hover:bg-muted">
                       <TableCell className="px-4 py-2">{item.barcode}</TableCell>
                       <TableCell className="px-4 py-2">{item.status}</TableCell>
                       <TableCell className="px-4 py-2">{item.rack}</TableCell>

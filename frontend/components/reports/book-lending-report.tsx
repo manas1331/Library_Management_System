@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { CalendarIcon, Download, Loader2, RefreshCw } from "lucide-react"
+import { CalendarIcon, Download, Loader2, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react"
 import { DateRange } from "react-day-picker"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
@@ -21,7 +21,11 @@ export function BookLendingReport() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>()
   const [timeframe, setTimeframe] = useState("last30days")
   const { toast } = useToast()
-  
+
+  // Add pagination state
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+
   // Statistics
   const [stats, setStats] = useState({
     totalLendings: 0,
@@ -29,33 +33,61 @@ export function BookLendingReport() {
     popularBooks: [] as any[],
     activeMembers: [] as any[]
   })
-  
+
   useEffect(() => {
     fetchLendingData()
   }, [timeframe, dateRange])
-  
+
+  // Reset page when filter changes
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [timeframe, dateRange])
+
   const fetchLendingData = async () => {
     setLoading(true)
     try {
       // Build API URL with timeframe or date range parameters
       let url = "http://localhost:8080/api/lendings"
-      
-      // In a real implementation, you would add query parameters for filtering
-      // For now, we'll fetch all and filter client-side
+
+      // Fetch lending data
       const response = await fetch(url)
-      
+
       if (!response.ok) {
         throw new Error("Failed to fetch lending data")
       }
-      
+
       const data = await response.json()
-      
+
       // Filter based on selected date range or timeframe
       const filteredData = filterLendingData(data)
-      setLendingData(filteredData)
-      
+
+      // Enhance lending data with member names
+      const lendingsWithMemberNames = await Promise.all(
+        filteredData.map(async (lending) => {
+          try {
+            // Fetch member details
+            const memberResponse = await fetch(`http://localhost:8080/api/members/${lending.memberId}`)
+            if (memberResponse.ok) {
+              const memberData = await memberResponse.json()
+              return {
+                ...lending,
+                memberName: memberData.person ?
+                  memberData.person.name :
+                  (memberData.name || 'Unknown')
+              }
+            }
+            return { ...lending, memberName: 'Unknown' }
+          } catch (error) {
+            console.error(`Error fetching member details for ${lending.memberId}:`, error)
+            return { ...lending, memberName: 'Unknown' }
+          }
+        })
+      )
+
+      setLendingData(lendingsWithMemberNames)
+
       // Calculate statistics
-      calculateStatistics(filteredData)
+      calculateStatistics(lendingsWithMemberNames)
     } catch (error) {
       console.error("Error fetching lending data:", error)
       toast({
@@ -67,7 +99,31 @@ export function BookLendingReport() {
       setLoading(false)
     }
   }
-  
+
+  // Calculate pagination info
+  const totalPages = Math.ceil(lendingData.length / pageSize)
+  const paginatedData = lendingData.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  )
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1)
+    }
+  }
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1)
+    }
+  }
+
+  const handlePageSizeChange = (value: string) => {
+    setPageSize(parseInt(value))
+    setCurrentPage(1) // Reset to first page when changing page size
+  }
+
   const filterLendingData = (data: any[]) => {
     if (dateRange && dateRange.from && dateRange.to) {
       // Filter by custom date range
@@ -79,7 +135,7 @@ export function BookLendingReport() {
       // Filter by selected timeframe
       const now = new Date()
       let startDate = new Date()
-      
+
       switch (timeframe) {
         case "last7days":
           startDate.setDate(now.getDate() - 7)
@@ -95,34 +151,31 @@ export function BookLendingReport() {
         default:
           startDate.setDate(now.getDate() - 30)
       }
-      
+
       return data.filter(item => {
         const creationDate = new Date(item.creationDate)
         return creationDate >= startDate
       })
     }
   }
-  
+
   const calculateStatistics = (data: any[]) => {
     // Total lendings
     const totalLendings = data.length
-    
+
     // Average checkout duration (in days)
     let totalDuration = 0
     const completedLendings = data.filter(item => item.returnDate)
-    
+
     completedLendings.forEach(item => {
       const checkoutDate = new Date(item.creationDate)
       const returnDate = new Date(item.returnDate)
       const durationDays = Math.round((returnDate.getTime() - checkoutDate.getTime()) / (1000 * 60 * 60 * 24))
       totalDuration += durationDays
     })
-    
+
     const avgCheckoutDuration = completedLendings.length ? Math.round(totalDuration / completedLendings.length) : 0
-    
-    // For this demo, we'll use placeholder data for popular books and active members
-    // In a real implementation, you would calculate these from the data
-    
+
     setStats({
       totalLendings,
       avgCheckoutDuration,
@@ -130,26 +183,27 @@ export function BookLendingReport() {
       activeMembers: []
     })
   }
-  
+
   const handleExportCSV = () => {
-    // Generate CSV content
-    const headers = ["Lending ID", "Book Barcode", "Member ID", "Checkout Date", "Due Date", "Return Date", "Status"]
+    // Export all data, not just current page
+    const headers = ["Lending ID", "Book Barcode", "Member ID", "Member Name", "Checkout Date", "Due Date", "Return Date", "Status"]
     const rows = lendingData.map(item => [
       item.id,
       item.bookItemBarcode,
       item.memberId,
+      item.memberName || 'Unknown',
       new Date(item.creationDate).toLocaleDateString(),
       new Date(item.dueDate).toLocaleDateString(),
       item.returnDate ? new Date(item.returnDate).toLocaleDateString() : "Not returned",
       item.returnDate ? "Returned" : "Active"
     ])
-    
+
     // Combine headers and rows
     const csvContent = [
       headers.join(","),
       ...rows.map(row => row.join(","))
     ].join("\n")
-    
+
     // Create a Blob and download link
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
     const url = URL.createObjectURL(blob)
@@ -161,7 +215,7 @@ export function BookLendingReport() {
     link.click()
     document.body.removeChild(link)
   }
-  
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -172,13 +226,13 @@ export function BookLendingReport() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalLendings}</div>
             <p className="text-xs text-muted-foreground">
-              {timeframe === "last7days" ? "Past 7 days" : 
-               timeframe === "last30days" ? "Past 30 days" : 
-               timeframe === "last90days" ? "Past 90 days" : "All time"}
+              {timeframe === "last7days" ? "Past 7 days" :
+                timeframe === "last30days" ? "Past 30 days" :
+                  timeframe === "last90days" ? "Past 90 days" : "All time"}
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Avg. Checkout Duration</CardTitle>
@@ -188,20 +242,20 @@ export function BookLendingReport() {
             <p className="text-xs text-muted-foreground">Per book checkout</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Overdue Rate</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {lendingData.length ? 
+              {lendingData.length ?
                 Math.round((lendingData.filter(item => new Date(item.dueDate) < new Date() && !item.returnDate).length / lendingData.length) * 100) : 0}%
             </div>
             <p className="text-xs text-muted-foreground">Current overdue percentage</p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Active Lendings</CardTitle>
@@ -214,7 +268,7 @@ export function BookLendingReport() {
           </CardContent>
         </Card>
       </div>
-      
+
       <Card>
         <CardHeader>
           <CardTitle>Book Lending Report</CardTitle>
@@ -236,7 +290,7 @@ export function BookLendingReport() {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="flex-1">
               <Label>Custom Date Range</Label>
               <Popover>
@@ -275,7 +329,7 @@ export function BookLendingReport() {
                 </PopoverContent>
               </Popover>
             </div>
-            
+
             <div className="flex items-end space-x-2">
               <Button variant="outline" onClick={fetchLendingData} disabled={loading}>
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
@@ -287,7 +341,7 @@ export function BookLendingReport() {
               </Button>
             </div>
           </div>
-          
+
           {loading ? (
             <div className="text-center py-10">
               <Loader2 className="h-8 w-8 animate-spin mx-auto" />
@@ -303,7 +357,7 @@ export function BookLendingReport() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Book Barcode</TableHead>
-                    <TableHead>Member ID</TableHead>
+                    <TableHead>Member</TableHead>
                     <TableHead>Checkout Date</TableHead>
                     <TableHead>Due Date</TableHead>
                     <TableHead>Return Date</TableHead>
@@ -311,10 +365,13 @@ export function BookLendingReport() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {lendingData.slice(0, 10).map((lending) => (
+                  {paginatedData.map((lending) => (
                     <TableRow key={lending.id}>
                       <TableCell>{lending.bookItemBarcode}</TableCell>
-                      <TableCell>{lending.memberId}</TableCell>
+                      <TableCell>
+                        <div className="font-medium">{lending.memberName || 'Unknown'}</div>
+                        <div className="text-xs text-muted-foreground">ID: {lending.memberId}</div>
+                      </TableCell>
                       <TableCell>{new Date(lending.creationDate).toLocaleDateString()}</TableCell>
                       <TableCell>{new Date(lending.dueDate).toLocaleDateString()}</TableCell>
                       <TableCell>
@@ -322,16 +379,16 @@ export function BookLendingReport() {
                       </TableCell>
                       <TableCell>
                         <span className={`px-2 py-1 rounded-full text-xs ${
-                          lending.returnDate 
-                            ? "bg-green-100 text-green-800" 
-                            : new Date(lending.dueDate) < new Date() 
-                              ? "bg-red-100 text-red-800" 
+                          lending.returnDate
+                            ? "bg-green-100 text-green-800"
+                            : new Date(lending.dueDate) < new Date()
+                              ? "bg-red-100 text-red-800"
                               : "bg-blue-100 text-blue-800"
                         }`}>
-                          {lending.returnDate 
-                            ? "Returned" 
-                            : new Date(lending.dueDate) < new Date() 
-                              ? "Overdue" 
+                          {lending.returnDate
+                            ? "Returned"
+                            : new Date(lending.dueDate) < new Date()
+                              ? "Overdue"
                               : "Active"}
                         </span>
                       </TableCell>
@@ -342,10 +399,50 @@ export function BookLendingReport() {
             </div>
           )}
         </CardContent>
-        <CardFooter className="flex justify-between">
-          <p className="text-sm text-muted-foreground">
-            Showing {Math.min(10, lendingData.length)} of {lendingData.length} records
-          </p>
+        <CardFooter className="flex items-center justify-between px-6 py-4">
+          <div className="flex items-center space-x-2">
+            <Label htmlFor="pageSize">Rows per page:</Label>
+            <Select
+              value={pageSize.toString()}
+              onValueChange={handlePageSizeChange}
+            >
+              <SelectTrigger id="pageSize" className="w-16">
+                <SelectValue placeholder={pageSize.toString()} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="20">20</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center justify-end space-x-2">
+            <div className="text-sm text-muted-foreground">
+              Showing {(currentPage - 1) * pageSize + 1}-
+              {Math.min(currentPage * pageSize, lendingData.length)} of {lendingData.length}
+            </div>
+            <div className="flex items-center space-x-1">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handlePreviousPage}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </CardFooter>
       </Card>
     </div>

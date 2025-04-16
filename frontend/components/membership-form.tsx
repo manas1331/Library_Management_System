@@ -88,16 +88,18 @@ export function MembershipForm() {
       
       toast({
         title: "Registration successful",
-        description: "Your membership has been created successfully.",
+        description: `Your membership has been created successfully. Your member ID is ${result.id}. Please save this for your records.`,
       });
       
-      // Redirect to login page
-      router.push('/auth/login');
+      // Redirect to login page after a short delay
+      setTimeout(() => {
+        router.push('/auth/login');
+      }, 3000);
     } catch (error) {
       console.error('Registration error:', error);
       toast({
         title: "Registration failed",
-        description: "There was a problem creating your membership. Please try again.",
+        description: "There was a problem creating your account. Please try again.",
         variant: "destructive",
       });
     } finally {

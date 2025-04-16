@@ -261,7 +261,7 @@ export function BookCatalog() {
       )}
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
+        <DialogContent className="bg-background border-border">
           <DialogHeader>
             <DialogTitle>{selectedBook?.title}</DialogTitle>
           </DialogHeader>

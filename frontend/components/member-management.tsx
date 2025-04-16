@@ -178,7 +178,7 @@ export function MemberManagement() {
 
       toast({
         title: "Success",
-        description: `Member ${newMember.name} has been added successfully.`,
+        description: `Member ${newMember.name} has been added successfully with ID: ${addedMember.id}`,
       })
 
       // Reset form and close dialog
