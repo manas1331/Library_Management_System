@@ -46,7 +46,7 @@ export function OverdueReport() {
       const overdueWithDays = await Promise.all(overdue.map(async (lending: any) => {
         const dueDate = new Date(lending.dueDate)
         const daysOverdue = Math.ceil((now.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24))
-        const potentialFine = daysOverdue * 0.5 // $0.50 per day
+        const potentialFine = daysOverdue * 0.5 // ₹0.50 per day
         
         // Try to get book and member details
         let bookDetails: any = {}
@@ -130,7 +130,7 @@ export function OverdueReport() {
       book.memberId,
       new Date(book.dueDate).toLocaleDateString(),
       book.daysOverdue,
-      `$${book.potentialFine.toFixed(2)}`
+      `₹${book.potentialFine.toFixed(2)}`
     ])
     
     // Combine headers and rows
@@ -179,8 +179,8 @@ export function OverdueReport() {
             <CardTitle className="text-sm font-medium">Potential Fines</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${stats.potentialFines.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">Uncollected fees ($0.50/day)</p>
+            <div className="text-2xl font-bold">₹{stats.potentialFines.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground">Uncollected fees (₹0.50/day)</p>
           </CardContent>
         </Card>
       </div>
@@ -234,7 +234,7 @@ export function OverdueReport() {
                       <TableCell>{book.memberName}</TableCell>
                       <TableCell>{new Date(book.dueDate).toLocaleDateString()}</TableCell>
                       <TableCell className="text-red-600 font-medium">{book.daysOverdue} days</TableCell>
-                      <TableCell>${book.potentialFine.toFixed(2)}</TableCell>
+                      <TableCell>₹{book.potentialFine.toFixed(2)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

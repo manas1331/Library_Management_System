@@ -74,7 +74,7 @@ export function FineReport() {
       fine.id,
       fine.bookItemBarcode,
       fine.memberId,
-      `$${fine.amount.toFixed(2)}`,
+      `₹${fine.amount.toFixed(2)}`,
       fine.reason,
       fine.creationDate ? new Date(fine.creationDate).toLocaleDateString() : "Unknown",
       fine.paid ? "Paid" : "Unpaid"
@@ -106,7 +106,7 @@ export function FineReport() {
             <CardTitle className="text-sm font-medium">Total Fines</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${summary.totalFines.toFixed(2)}</div>
+            <div className="text-2xl font-bold">₹{summary.totalFines.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">All time</p>
           </CardContent>
         </Card>
@@ -116,7 +116,7 @@ export function FineReport() {
             <CardTitle className="text-sm font-medium">Collected</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${summary.totalCollected.toFixed(2)}</div>
+            <div className="text-2xl font-bold">₹{summary.totalCollected.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">
               {summary.totalFines > 0 ? `${Math.round((summary.totalCollected / summary.totalFines) * 100)}% of total` : "0% of total"}
             </p>
@@ -128,7 +128,7 @@ export function FineReport() {
             <CardTitle className="text-sm font-medium">Pending</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${summary.totalPending.toFixed(2)}</div>
+            <div className="text-2xl font-bold">₹{summary.totalPending.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">
               {summary.totalFines > 0 ? `${Math.round((summary.totalPending / summary.totalFines) * 100)}% of total` : "0% of total"}
             </p>
@@ -140,7 +140,7 @@ export function FineReport() {
             <CardTitle className="text-sm font-medium">Avg. Fine</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${summary.averageFine.toFixed(2)}</div>
+            <div className="text-2xl font-bold">₹{summary.averageFine.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">Per incident</p>
           </CardContent>
         </Card>
@@ -196,7 +196,7 @@ export function FineReport() {
                       <TableCell>
                         {fine.creationDate ? new Date(fine.creationDate).toLocaleDateString() : "Unknown"}
                       </TableCell>
-                      <TableCell>${fine.amount.toFixed(2)}</TableCell>
+                      <TableCell>₹{fine.amount.toFixed(2)}</TableCell>
                       <TableCell>
                         <span className={`px-2 py-1 rounded-full text-xs ${
                           fine.paid ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"
