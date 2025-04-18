@@ -7,5 +7,6 @@ import java.util.List;
 public interface FineRepository extends MongoRepository<Fine, String> {
     List<Fine> findByMemberId(String memberId);
     List<Fine> findByMemberIdAndPaidIsFalse(String memberId);
+    List<Fine> findByBookItemBarcode(String bookItemBarcode);
 }
 

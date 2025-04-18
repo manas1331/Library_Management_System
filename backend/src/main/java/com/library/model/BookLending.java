@@ -23,9 +23,9 @@ public class BookLending {
         this.bookItemBarcode = bookItemBarcode;
         this.memberId = memberId;
         
-        // Set due date to 10 days from now
+        // Set due date to 3 days from now
         Date dueDate = new Date();
-        dueDate.setTime(dueDate.getTime() + (10 * 24 * 60 * 60 * 1000));
+        dueDate.setTime(dueDate.getTime() + (3 * 24 * 60 * 60 * 1000));
         this.dueDate = dueDate;
     }
 
@@ -87,12 +87,16 @@ public class BookLending {
     }
 
     public int getDaysOverdue() {
+        return getDaysOverdue(new Date());
+    }
+    
+    public int getDaysOverdue(Date referenceDate) {
         if (!isOverdue()) {
             return 0;
         }
         
-        Date today = new Date();
-        long diff = today.getTime() - dueDate.getTime();
+        Date dateToUse = returnDate != null ? returnDate : referenceDate;
+        long diff = dateToUse.getTime() - dueDate.getTime();
         return (int) (diff / (24 * 60 * 60 * 1000));
     }
 }

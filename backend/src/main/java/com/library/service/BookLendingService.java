@@ -69,7 +69,7 @@ public class BookLendingService {
             // Check for fine
             if (lending.isOverdue()) {
                 int daysOverdue = lending.getDaysOverdue();
-                double fineAmount = daysOverdue * 0.50; // $0.50 per day
+                double fineAmount = daysOverdue * 1.0; // $1.00 per day
                 Fine fine = new Fine(bookItemBarcode, lending.getMemberId(), fineAmount);
                 fineRepository.save(fine);
             }
@@ -87,16 +87,42 @@ public class BookLendingService {
     
     public BookLending renewBook(String bookItemBarcode, String memberId) {
         BookLending lending = bookLendingRepository.findByBookItemBarcodeAndReturnDateIsNull(bookItemBarcode);
-        if (lending != null && lending.getMemberId().equals(memberId)) {
-            // Check if book is overdue
-            if (lending.isOverdue()) {
-                return null; // Can't renew overdue books
+        if (lending == null || !lending.getMemberId().equals(memberId)) {
+            throw new RuntimeException("No active lending found for this book and member");
+        }
+
+        // Set new due date to 3 days from now
+        Date newDueDate = new Date();
+        newDueDate.setTime(newDueDate.getTime() + (3 * 24 * 60 * 60 * 1000));
+        lending.setDueDate(newDueDate);
+        
+        return bookLendingRepository.save(lending);
+    }
+    
+    public List<Fine> getFinesByBookItemBarcode(String barcode) {
+        return fineRepository.findByBookItemBarcode(barcode);
+    }
+    
+    public BookLending testReturnBook(String bookItemBarcode, Date referenceDate) {
+        BookLending lending = bookLendingRepository.findByBookItemBarcodeAndReturnDateIsNull(bookItemBarcode);
+        if (lending != null) {
+            // Set return date to the reference date for testing
+            lending.setReturnDate(referenceDate);
+            
+            // Check for fine using the reference date
+            if (referenceDate.after(lending.getDueDate())) {
+                int daysOverdue = lending.getDaysOverdue(referenceDate);
+                double fineAmount = daysOverdue * 1.0; // $1.00 per day
+                Fine fine = new Fine(bookItemBarcode, lending.getMemberId(), fineAmount);
+                fine.setCreationDate(referenceDate); // Set creation date to reference date
+                fineRepository.save(fine);
             }
             
-            // Set new due date (10 days from now)
-            Date newDueDate = new Date();
-            newDueDate.setTime(newDueDate.getTime() + (10 * 24 * 60 * 60 * 1000));
-            lending.setDueDate(newDueDate);
+            // Update book status
+            bookService.updateBookItemStatus(bookItemBarcode, BookStatus.AVAILABLE);
+            
+            // Decrement member's checked out books count
+            memberService.decrementBooksCheckedout(lending.getMemberId());
             
             return bookLendingRepository.save(lending);
         }

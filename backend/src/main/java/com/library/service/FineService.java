@@ -29,6 +29,10 @@ public class FineService {
         return fineRepository.findByMemberIdAndPaidIsFalse(memberId);
     }
     
+    public List<Fine> getFinesByBookItemBarcode(String barcode) {
+        return fineRepository.findByBookItemBarcode(barcode);
+    }
+    
     public Fine createFine(String bookItemBarcode, String memberId, double amount) {
         Fine fine = new Fine(bookItemBarcode, memberId, amount);
         return fineRepository.save(fine);

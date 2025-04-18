@@ -66,5 +66,24 @@ public class FineController {
             return ResponseEntity.notFound().build();
         }
     }
+    
+    @PostMapping("/book/{barcode}/pay")
+    public ResponseEntity<?> payFineByBarcode(@PathVariable String barcode) {
+        List<Fine> fines = fineService.getFinesByBookItemBarcode(barcode);
+        Fine unpaidFine = fines.stream()
+                .filter(fine -> !fine.isPaid())
+                .findFirst()
+                .orElse(null);
+                
+        if (unpaidFine == null) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        if (fineService.collectFine(unpaidFine.getId())) {
+            return ResponseEntity.ok(unpaidFine);
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to process fine payment");
+        }
+    }
 }
 
