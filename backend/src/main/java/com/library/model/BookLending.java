@@ -25,7 +25,7 @@ public class BookLending {
         
         // Set due date to 3 days from now
         Date dueDate = new Date();
-        dueDate.setTime(dueDate.getTime() + (3 * 24 * 60 * 60 * 1000));
+        dueDate.setTime(dueDate.getTime() + (24 * 60 * 60 * 1000));
         this.dueDate = dueDate;
     }
 

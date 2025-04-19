@@ -86,19 +86,7 @@ public class BookLendingService {
         return null;
     }
     
-    public BookLending renewBook(String bookItemBarcode, String memberId) {
-        BookLending lending = bookLendingRepository.findByBookItemBarcodeAndReturnDateIsNull(bookItemBarcode);
-        if (lending == null || !lending.getMemberId().equals(memberId)) {
-            throw new RuntimeException("No active lending found for this book and member");
-        }
 
-        // Set new due date to 3 days from now
-        Date newDueDate = new Date();
-        newDueDate.setTime(newDueDate.getTime() + (3 * 24 * 60 * 60 * 1000));
-        lending.setDueDate(newDueDate);
-        
-        return bookLendingRepository.save(lending);
-    }
     
     public List<Fine> getFinesByBookItemBarcode(String barcode) {
         return fineRepository.findByBookItemBarcode(barcode);

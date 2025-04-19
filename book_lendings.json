@@ -1,0 +1,2 @@
+{"_id":{"$oid":"67ffe5a9a53ca4552723751c"},"creationDate":{"$date":"2025-04-16T17:15:21.523Z"},"dueDate":{"$date":"2025-04-26T17:15:21.523Z"},"returnDate":{"$date":"2025-04-17T06:08:03.355Z"},"bookItemBarcode":"978-1-4028-9462-6-1744811498181-912","memberId":"PES1LIB4321","_class":"com.library.model.BookLending"}
+{"_id":{"$oid":"67ffe5dfa53ca4552723751d"},"creationDate":{"$date":"2025-04-16T17:16:15.047Z"},"dueDate":{"$date":"2025-04-26T17:16:15.047Z"},"bookItemBarcode":"978-1-4028-9462-6-1744811498185-707","memberId":"PES1LIB4321","_class":"com.library.model.BookLending"}

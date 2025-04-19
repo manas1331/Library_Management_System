@@ -112,22 +112,6 @@ public class BookLendingController {
         }
     }
     
-    @PostMapping("/renew")
-    public ResponseEntity<BookLending> renewBook(@RequestBody Map<String, String> payload) {
-        String bookItemBarcode = payload.get("bookItemBarcode");
-        String memberId = payload.get("memberId");
-        
-        if (bookItemBarcode == null || memberId == null) {
-            return ResponseEntity.badRequest().build();
-        }
-        
-        BookLending lending = bookLendingService.renewBook(bookItemBarcode, memberId);
-        if (lending != null) {
-            return ResponseEntity.ok(lending);
-        } else {
-            return ResponseEntity.badRequest().build();
-        }
-    }
 
     @PostMapping("/test/return")
     public ResponseEntity<?> testReturnBook(@RequestBody Map<String, Object> payload) {
