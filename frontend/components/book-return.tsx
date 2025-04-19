@@ -23,7 +23,7 @@ export function BookReturn() {
 
   const getCurrentDate = () => {
     if (testMode) {
-      return new Date("2025-05-01T00:00:00");
+      return new Date("2025-05-01T00:00:01");
     }
     return new Date();
   }
@@ -329,7 +329,7 @@ export function BookReturn() {
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Late Return</AlertTitle>
                   <AlertDescription>
-                    This book is overdue and will incur a fine of ${fine.amount.toFixed(2)}.
+                    This book is overdue,system will calculate the fine.
                   </AlertDescription>
                 </Alert>
               )}
@@ -339,7 +339,7 @@ export function BookReturn() {
                   <DollarSign className="h-4 w-4" />
                   <AlertTitle>Fine Due</AlertTitle>
                   <AlertDescription>
-                    A fine of ${fine.amount.toFixed(2)} has been applied for late return.
+                    A finehas been applied for late return.
                   </AlertDescription>
                 </Alert>
               )}

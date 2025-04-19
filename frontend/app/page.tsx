@@ -93,10 +93,10 @@ export default function Home() {
             <TabsContent value="myborrowing" className="mt-6">
               {user && user.role === "MEMBER" && (
                 <Tabs defaultValue="borrowing" className="mt-6">
-                  <TabsList className="grid w-full grid-cols-3">
+                  <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="borrowing">My Borrowings</TabsTrigger>
                     <TabsTrigger value="history">Borrowing History</TabsTrigger>
-                    <TabsTrigger value="reservation">Reservation History</TabsTrigger>
+                    {/* <TabsTrigger value="reservation">Reservation History</TabsTrigger> */}
                   </TabsList>
                   <TabsContent value="borrowing" className="mt-4">
                     <UserBorrowings />
@@ -104,9 +104,7 @@ export default function Home() {
                   <TabsContent value="history" className="mt-4">
                     <UserBorrowingHistory />
                   </TabsContent>
-                  <TabsContent value="reservation" className="mt-4">
-                    Hello world
-                  </TabsContent>
+
                 </Tabs>
               )}
             </TabsContent>
