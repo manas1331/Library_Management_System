@@ -26,6 +26,9 @@ public class BookLendingService {
     @Autowired
     private MemberService memberService;
     
+    @Autowired
+    private FineService fineService;
+    
     public List<BookLending> getAllLendings() {
         return bookLendingRepository.findAll();
     }
@@ -64,14 +67,12 @@ public class BookLendingService {
         BookLending lending = bookLendingRepository.findByBookItemBarcodeAndReturnDateIsNull(bookItemBarcode);
         if (lending != null) {
             // Set return date
-            lending.setReturnDate(new Date());
+            Date returnDate = new Date();
+            lending.setReturnDate(returnDate);
             
-            // Check for fine
+            // Calculate and create fine if needed using the adapter pattern
             if (lending.isOverdue()) {
-                int daysOverdue = lending.getDaysOverdue();
-                double fineAmount = daysOverdue * 1.0; // $1.00 per day
-                Fine fine = new Fine(bookItemBarcode, lending.getMemberId(), fineAmount);
-                fineRepository.save(fine);
+                fineService.calculateAndCreateFine(lending, returnDate);
             }
             
             // Update book status
@@ -109,13 +110,9 @@ public class BookLendingService {
             // Set return date to the reference date for testing
             lending.setReturnDate(referenceDate);
             
-            // Check for fine using the reference date
+            // Use the fine calculator adapter for testing too
             if (referenceDate.after(lending.getDueDate())) {
-                int daysOverdue = lending.getDaysOverdue(referenceDate);
-                double fineAmount = daysOverdue * 1.0; // $1.00 per day
-                Fine fine = new Fine(bookItemBarcode, lending.getMemberId(), fineAmount);
-                fine.setCreationDate(referenceDate); // Set creation date to reference date
-                fineRepository.save(fine);
+                fineService.calculateAndCreateFine(lending, referenceDate);
             }
             
             // Update book status
