@@ -3,7 +3,7 @@
 
 ## Problem Statement:
 - Traditional library management involves manual record-keeping, leading to inefficiencies such as book misplacement, slow book searching, and difficulty tracking due dates.
-- The LMS aims to streamline these processes by providing a centralized digital platform for managing library activities
+- The LMS(Library Management System) aims to streamline these processes by providing a centralized digital platform for managing library activities
 
 
 
